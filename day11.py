@@ -1,4 +1,5 @@
 import time
+from functools import lru_cache
 
 
 # try out decorator pattern
@@ -39,10 +40,28 @@ def count(start, iterations):
             res = count(start * 2024, iterations - 1)
         else:
             l //= 2
-            res = count(int(s[:l]), iterations - 1) + count(int(s[l:]), iterations - 1)
+            res = count(int(s[:l]), iterations - 1) + \
+                  count(int(s[l:]), iterations - 1)
 
     cache[(start, iterations)] = res
     return res
+
+# alternative method, use functools.lru_cache instead of manual caching
+# seems a bit faster as well
+@lru_cache(maxsize=None)
+def count2(start, iterations):
+    if iterations == 0:
+        return 1
+
+    if start == 0:
+        return count2(1, iterations - 1)
+    s = str(start)
+    l = len(s)
+    if l & 1:
+        return count2(start * 2024, iterations - 1)
+    l //= 2
+    return count2(int(s[:l]), iterations - 1) + \
+           count2(int(s[l:]), iterations - 1)
 
 
 @print_time
@@ -50,7 +69,13 @@ def solve():
     print(sum([count(x, 75) for x in a]))
 
 
+@print_time
+def solve2():
+    print(sum([count2(x, 75) for x in a]))
+
+
 solve()
+solve2()
 
 '''
 # part 1, bruteforce
